@@ -1,0 +1,164 @@
+
+# -*- coding: UTF-8 -*-
+print(__doc__)
+
+import sys
+import os
+from keras.utils import np_utils
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+import numpy as np
+import PIL.Image as Image
+import time
+import  time
+
+pngRootPath ='/home/hylas/dev/data/min5_png/'
+
+imgWidth  =480
+imgHeitht =480
+nWidth  = 28
+nHeight = 28
+nCannle = 1
+input_dim = (nWidth, nHeight, nCannle )
+
+
+# 卷积层中使用的卷积核的个数
+nb_filters = 32
+# 卷积核的大小
+kernel_size = (3, 3)
+# 池化层操作的范围
+pool_size = (2, 2)
+nEpochs = 20
+batch_size = 32
+
+samples_per_epoch= 48000
+#samples_per_epoch= 9600
+
+
+import keras
+from sklearn.datasets import fetch_mldata
+from keras.layers import Conv2D, MaxPooling2D
+from keras.optimizers import SGD
+from keras.models import load_model
+from keras.layers import Dense, Dropout, Flatten
+from keras.utils import np_utils
+
+
+
+#  类似VGG的卷积神经网络：   Conv2D --> Conv2D --> MaxPooling2D --> Conv2D --> Conv2D --> MaxPooling2D
+#   --> Flatten -->Dense(256) -->Dense(10)
+def BuildMode_VGG():
+
+    print 'input_dim:', input_dim
+    model = Sequential()
+
+    model.add(Conv2D(nb_filters , kernel_size, activation='relu', input_shape= input_dim   ))
+    model.add(Conv2D(nb_filters , kernel_size, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D( nb_filters*2 , kernel_size,  activation='relu'))
+    model.add(Conv2D( nb_filters*2 , kernel_size,  activation='relu'))
+    model.add(MaxPooling2D(pool_size=  pool_size   ))
+    model.add(Dropout(0.25))
+
+    model.add(Flatten())
+    model.add(Dense(256, activation='relu'))
+
+
+    model.add(Dropout(0.5))
+    model.add(Dense(5, activation='softmax'))
+
+    print model.summary()
+    #return
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+
+def dataInfo(data):
+    print type(data)
+    if (  isinstance (	data,  np.ndarray  ) ):
+        print data.shape
+
+def dataDetail(data):
+    print data
+
+
+
+
+def do2_fit_mem():
+
+    t = time.time()
+    #X,y = generate2mem( 'png_file_list.csv',  samples_per_epoch)
+    X, y = loaddatafromdisk()
+
+    print type(X), type(y)
+    print X.shape ,  y.shape
+    print 'time:' , time.time() - t
+
+    model = BuildMode_VGG()
+
+    #print generate_arrays_from_file('png_file_list.csv', batch_size  )
+    model.fit(  X,y, batch_size,  nb_epoch= nEpochs,     verbose=1 , validation_split=0.10   )
+
+    model.save('stock_vgg2_'+ time.strftime('vgg2_%Y-%m-%d-%X', time.localtime()) +'.h5')
+
+    x_test=X[:1000]
+    y_test=y[:1000]
+
+    x_test, y_test = loadtestdatafromdisk()
+
+    testModle(model, x_test, y_test, batch_size= batch_size )
+
+
+def loaddatafromdisk():
+
+    data = np.loadtxt('data_table_' + str(samples_per_epoch) + '_x.txt' )
+    print 'from:', data.shape
+
+    data = data.reshape(  (samples_per_epoch, 28,28,1)   )
+    print  'to:', data.shape
+    y =  np.loadtxt('data_table_' + str(samples_per_epoch) + '_y.txt' )
+    return  data,y
+
+def loadtestdatafromdisk():
+    data = np.loadtxt('data_table_test_x.txt' )
+    print 'from:', data.shape
+
+    data = data.reshape(  (1000, 28,28,1)   )
+    print  'to:', data.shape
+    y =  np.loadtxt('data_table_test_y.txt' )
+    return  data,y
+
+
+def testModle(model, x_test ,y_test, batch_size= 32 ):
+
+    y_pret= model.predict(x_test , batch_size= batch_size  )
+
+    y_pret[0] =  y_pret[0] / y_pret[0].max()
+    y_pret[0][(y_pret[0] != y_pret[0].max() )  ] = 0
+    print y_pret[0]
+
+    y_pret_ex =  y_pret.copy()
+
+    for i  in range(0, len( y_pret ) ):
+        y_pret_ex[i] = y_pret_ex[i] / y_pret_ex[i].max()
+        y_pret_ex[i][(y_pret_ex[i] != y_pret_ex[i].max())] = 0
+    print '------------------------------------'
+
+    #print y_pret_ex[:10]
+    #print y_pret[:10]
+
+    test_accuracy = np.mean(np.equal(y_test, y_pret_ex))
+    print("accuarcy:", test_accuracy)
+
+def test():
+    do2_fit_mem()
+    pass
+
+if __name__ == "__main__":
+    sys_code_type = sys.getfilesystemencoding()
+    test()
