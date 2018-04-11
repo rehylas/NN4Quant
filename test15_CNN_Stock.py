@@ -13,6 +13,8 @@ import PIL.Image as Image
 import time
 import  time
 
+### git test
+
 pngRootPath ='/home/hylas/dev/data/min5_png/'
 
 imgWidth  =480
