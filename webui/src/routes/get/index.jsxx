@@ -1,0 +1,90 @@
+import React from 'react'
+import { Icon,Form,Row,Col,InputNumber,Button,Input, Select, Tabs} from 'antd'
+import { connect } from 'dva'
+import styles from './index.less'
+const ButtonGroup = Button.Group;
+import ewm from '../../public/ewm.jpg'
+const Option = Select.Option;
+const TabPane = Tabs.TabPane;
+const FormItem = Form.Item
+const selectBefore = (
+  <Select  style={{ width: 180 }}>
+    <Option value="1">比特币提取</Option>
+    <Option value="2">以太币提取</Option>
+  </Select>
+);
+
+const formItemLayout = {
+  labelCol: {
+    span: 6,
+  },
+  wrapperCol: {
+    span: 14,
+  },
+}
+const Get = ({
+  item={},
+  form: {
+    getFieldDecorator,
+    validateFields,
+    getFieldsValue,
+    setFieldsValue
+  }
+}) => {
+  const handleOk = () => {
+    validateFields((errors) => {
+      if (errors) {
+        return
+      }
+      const data = {
+        ...getFieldsValue(),
+        key: item.key,
+      }
+      this.props.
+      console.log('提交表单：',data)
+    })
+  }
+  return (<div>
+    <Form layout="horizontal">
+      <FormItem label="虚拟币种类" hasFeedback {...formItemLayout}>
+        {getFieldDecorator('label', { initialValue: '1',
+          rules: [
+            {
+              required: true,
+              message:'种类不能为空'
+            },
+          ] })(<Select  style={{ width: '100%' }}>
+          <Option value="1">比特币提取</Option>
+          <Option value="2">以太币提取</Option>
+        </Select>)}
+      </FormItem>
+      <FormItem label="钱包地址" hasFeedback {...formItemLayout}>
+        {getFieldDecorator('name', { initialValue: item.name,
+          rules: [
+            {
+              required: true,
+              message:'地址不能为空'
+            },
+          ] })(<Input placeholder="请输入关键字"  />)}
+      </FormItem>
+      <FormItem label="提取数量" hasFeedback {...formItemLayout}>
+        {getFieldDecorator('note', { initialValue: item.note,
+          rules: [
+            {
+              required: true,
+              message:'数量不能为空'
+            },
+          ] })( <InputNumber  style={{ width: '100%' }} min={0} step={0.1}  />)}
+      </FormItem>
+    </Form>
+    <Row type="flex" justify="center">
+      <Button type="primary" onClick={handleOk} >
+        确认提取
+      </Button>
+    </Row>
+
+  </div>)
+}
+
+
+export default Form.create()(Get)

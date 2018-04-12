@@ -1,0 +1,16 @@
+{
+  "extends": "eslint-config-egg",
+  "globals": {
+    "module": true
+  },
+  "rules": {
+    "indent": ["error", 4, {"SwitchCase": 1}],
+    "linebreak-style": ["off", "unix"],
+    "space-before-function-paren": ["error", "always"],
+    "object-curly-spacing": ["error", "never"],
+    "prefer-const": "off",
+    "comma-dangle": "off",
+    "array-bracket-spacing": "off",
+    "no-console": "error"
+  }
+}
