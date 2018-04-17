@@ -3,7 +3,7 @@ print(__doc__)
 
 
 # Code source: Jaques Grobler
-# License: BSD 3 clause
+# License: BSD 3 clause    debug
 
 import sys
 #import matplotlib.pyplot as plt
